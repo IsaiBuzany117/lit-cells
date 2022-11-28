@@ -1,5 +1,7 @@
 import '../dist/output.css'
 import { LitElement, html, css, nothing } from 'lit';
+import './components/list-component';
+import './components/input-component';
 
 export class ToDo extends LitElement {
     static styles = [
@@ -7,32 +9,12 @@ export class ToDo extends LitElement {
             :host {
                 display: flex;
             }
-            li {
-                display: block;
-                cursor: pointer;
-            }
-            li > p {
-                padding-left: 2rem;
-            }
-            li > h3 {
-                font-size: 2rem;
-            }
-            .pending:hover {
-                color: #259;
-                font-weight: 900;
-            }
             button {
                 background-color: #111;
                 color: #fff;
                 padding: 4px 10px;
                 border-radius: 10px;
-            }
-            input {
-                padding: 4px 10px;
-            }
-            .done {
-                text-decoration-line: line-through;
-                color: #888;
+                cursor: pointer;
             }
             .container {
                 width: 600px;
@@ -41,12 +23,14 @@ export class ToDo extends LitElement {
     ];
 
     static properties = {
-        tasks: { type: Array },
+        taskArray: { type: Array },
+        title: {type:String},
+        desc: {type:String}
     };
 
     constructor() {
         super();
-        this.tasks = [
+        this.taskArray = [
             {
                 done: false,
                 title: "task 1",
@@ -58,76 +42,88 @@ export class ToDo extends LitElement {
                 desc: "segunda desc ",
             },
             {
-                done: false,
+                done: true,
                 title: "task 3",
                 desc: "terceradesc",
             },
         ];
-        this.done = [];
-    }
-    handleClick(task) {
-        task.done = !task.done;
-        this.requestUpdate();
+        this.title = ''
+        this.desc = ''
     }
 
-    get title() {
-        return this.renderRoot?.querySelector("#title") ?? null;
+    pending() { 
+        return this.taskArray.filter((task) => task.done === false); 
     }
 
-    get desc() {
-        return this.renderRoot?.querySelector("#desc") ?? null;
+    done() {
+        return this.taskArray.filter((task) => task.done === true); 
     }
 
-    addNewTask() {
-        if (this.title.value !== "" && this.desc.value !== '') {
-            this.tasks.push({
+    addTask() {
+        if (this.title !== "" && this.desc !== "") {
+            this.taskArray.push({
                 done: false,
-                title: this.title.value,
-                desc: this.desc.value,
+                title: this.title,
+                desc: this.desc,
             });
-            this.title.value = "";
-            this.desc.value = "";
+            this.title = "";
+            this.desc = "";
             this.requestUpdate();
         } else {
-            alert("Agrega un titulo y una descripcion")
+            alert("Agrega un titulo y una descripcion");
         }
+    }
+    completingTask(e) {
+        console.log(this.pending())
+        console.log(this.done());
+        this.requestUpdate()
     }
 
     render() {
-        const pending = this.tasks.filter((task) => {
-            return task.done === false;
-        });
-        const done = this.tasks.filter((task) => {
-            return task.done === true;
-        });
+        console.log(this.pending().length)
         return html`
-            <div class="container bg-lime-400">
+            <div class="container">
                 <h1>ToDo</h1>
-                <input type="text" id="title" placeholder="Escribe un titulo" />
-                <input type="text" id="desc" placeholder="Escribe  una descripcion" />
-                <button @click=${this.addNewTask}>Agregar nueva tarea</button>
-
+                <input-component placeholder="Escribe un titulo" .inValue=${this.title} @input=${(e) => { 
+                    this.title = e.target.inValue
+                 }}></input-component>
+                <input-component placeholder="Escribe  una descripcion" .inValue=${this.desc} @input=${(e) => { 
+                    this.desc = e.target.inValue
+                 }}></input-component>
+                <button @click=${this.addTask}>Agregar nueva tarea</button>
+                
                 ${
-                    pending.length > 0?
-                    pending.map(
-                    (task) => html`
-                        <li class="pending" @click=${() => this.handleClick(task)}>
-                            <h3>${task.title}</h3>
-                            <p>${task.desc}</p>
-                        </li>
-                    `) : html`
-                        <p>No hay tareas por hacer!</p>
-                    `
+                    this.pending().length > 0
+                        ? html`
+                            <list-component
+                                .tasks=${this.pending()}
+                                @completing=${this.completingTask}
+                            ></list-component>
+                        `
+                        : html`
+                            <p>No hay tareas pendientes!</p>  
+                        `
+
                 }
+                <!-- ${
+                    this.pending().length <= 0 
+                    ? html`
+                    ` : nothing
+                } -->
                 <hr />
-                ${done.map(
-                    (task) => html`
-                        <li class="done" @click=${() => this.handleClick(task)}>
-                            <h3>${task.title} - HECHA!</h3>
-                            <p>${task.desc}</p>
-                        </li>
-                    `
-                )}
+                ${
+
+                    this.done().length > 0
+                        ? html`
+                            <list-component
+                                .tasks=${this.done()}
+                                @completing=${this.completingTask}
+                            ></list-component>
+                        `
+                        : html`
+                            <p>Tienes tareas por hacer.</p>
+                        `
+                }
             </div>
         `;
     }
