@@ -1,5 +1,4 @@
 import { LitElement, html, css } from 'lit';
-import { changeStatus } from '../utils/changeStatus'
 
 export class ListComponent extends LitElement {
     static styles = [
@@ -34,7 +33,7 @@ export class ListComponent extends LitElement {
 
     constructor() {
         super();
-        this.tasks = [];
+        this.tasks = [{}];
     }
 
     dispatchCompleting(task) {
@@ -56,7 +55,6 @@ export class ListComponent extends LitElement {
                         <li class=${task.done ? 'done' : 'pending'} @click=${() => this.dispatchCompleting(task)}>
                             <h3>${task.title}</h3>
                             <p>${task.desc}</p>
-                            <!-- <p>${task}</p> -->
                         </li>
                     `
                 )}

@@ -8,6 +8,7 @@ export class ToDo extends LitElement {
         css`
             :host {
                 display: flex;
+                padding: 5px;
             }
             button {
                 background-color: #111;
@@ -61,35 +62,37 @@ export class ToDo extends LitElement {
 
     addTask() {
         if (this.title !== "" && this.desc !== "") {
-            this.taskArray.push({
-                done: false,
-                title: this.title,
-                desc: this.desc,
-            });
-            this.title = "";
-            this.desc = "";
-            this.requestUpdate();
+            this.taskArray = [
+                ...this.taskArray,
+                {
+                    done: false,
+                    title: this.title,
+                    desc: this.desc,
+                },
+            ];
         } else {
             alert("Agrega un titulo y una descripcion");
         }
+        this.title = ''
+        this.desc = ''
+        console.log(this.title)
+        console.log(this.desc)
+        this.requestUpdate();
     }
     completingTask(e) {
-        console.log(this.pending())
-        console.log(this.done());
         this.requestUpdate()
     }
 
     render() {
-        console.log(this.pending().length)
         return html`
             <div class="container">
                 <h1>ToDo</h1>
                 <input-component placeholder="Escribe un titulo" .inValue=${this.title} @input=${(e) => { 
                     this.title = e.target.inValue
-                 }}></input-component>
+                }}></input-component>
                 <input-component placeholder="Escribe  una descripcion" .inValue=${this.desc} @input=${(e) => { 
                     this.desc = e.target.inValue
-                 }}></input-component>
+                }}></input-component>
                 <button @click=${this.addTask}>Agregar nueva tarea</button>
                 
                 ${
@@ -103,16 +106,9 @@ export class ToDo extends LitElement {
                         : html`
                             <p>No hay tareas pendientes!</p>  
                         `
-
                 }
-                <!-- ${
-                    this.pending().length <= 0 
-                    ? html`
-                    ` : nothing
-                } -->
                 <hr />
                 ${
-
                     this.done().length > 0
                         ? html`
                             <list-component
